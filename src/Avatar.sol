@@ -3,6 +3,6 @@ pragma solidity ^0.8.17;
 
 import "./URIStorage.sol";
 
-contract Space is URIStorage {
-    constructor() URIStorage("Space", "SPACE") {}
+contract Avatar is URIStorage {
+    constructor() URIStorage("Avatar", "AVATAR") {}
 }
