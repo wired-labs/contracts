@@ -12,9 +12,10 @@ contract URIStorage is ERC721URIStorage {
 
     constructor(string memory name, string memory symbol) ERC721(name, symbol) {}
 
-    function mint(address to) public {
-        _safeMint(to, count);
+    function mint(address to) public returns (uint256) {
+        _mint(to, count);
         count++;
+        return count - 1;
     }
 
     function setTokenURI(uint256 tokenId, string memory tokenURI) public {
