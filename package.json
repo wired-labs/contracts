@@ -1,0 +1,14 @@
+{
+  "name": "contracts",
+  "version": "0.0.0",
+  "description": "Smart contracts for the Wired, using [Foundry](https://github.com/foundry-rs/foundry).",
+  "scripts": {
+    "format": "prettier --write src && prettier --write test"
+  },
+  "license": "GPL-3.0-or-later",
+  "homepage": "https://github.com/wired-labs/contracts#readme",
+  "devDependencies": {
+    "prettier": "^2.8.1",
+    "prettier-plugin-solidity": "^1.1.0"
+  }
+}
