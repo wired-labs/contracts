@@ -54,7 +54,12 @@ contract ProfileTest is Test {
     function testFailSetHandleNotOwner() public {
         uint256 tokenId = profile.mint(address(1));
 
-        vm.prank(address(2));
+        startHoax(address(2));
         profile.setHandle(tokenId, "test");
+    }
+
+    function testFailSetHandleInvalidTokenId() public {
+        uint256 tokenId = profile.mint(address(1));
+        profile.setHandle(tokenId + 1, "test");
     }
 }
