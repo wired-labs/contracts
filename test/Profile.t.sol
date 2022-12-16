@@ -2,6 +2,7 @@
 pragma solidity ^0.8.17;
 
 import "lib/forge-std/src/Test.sol";
+import "lib/forge-std/src/console.sol";
 import "../src/Profile.sol";
 
 contract ProfileTest is Test {
@@ -14,6 +15,7 @@ contract ProfileTest is Test {
 
     function testSetHandle(string memory handle) public {
         vm.assume(bytes(handle).length > 0);
+        vm.assume(bytes(handle).length < profile.MAX_HANDLE_LENGTH());
 
         uint256 tokenId = profile.mint(address(1));
         profile.setHandle(tokenId, handle);
@@ -24,6 +26,7 @@ contract ProfileTest is Test {
 
     function testSetHandleTwice(string memory handle) public {
         vm.assume(bytes(handle).length > 0);
+        vm.assume(bytes(handle).length < profile.MAX_HANDLE_LENGTH());
 
         uint256 tokenId = profile.mint(address(1));
         profile.setHandle(tokenId, handle);
@@ -36,6 +39,8 @@ contract ProfileTest is Test {
     function testSetHandleTwiceDifferent(string memory handle1, string memory handle2) public {
         vm.assume(bytes(handle1).length > 0);
         vm.assume(bytes(handle2).length > 0);
+        vm.assume(bytes(handle1).length < profile.MAX_HANDLE_LENGTH());
+        vm.assume(bytes(handle2).length < profile.MAX_HANDLE_LENGTH());
         vm.assume(keccak256(abi.encodePacked(handle1)) != keccak256(abi.encodePacked(handle2)));
 
         uint256 tokenId = profile.mint(address(1));
@@ -46,9 +51,24 @@ contract ProfileTest is Test {
         assertEq(profile.handle(tokenId), string(abi.encodePacked(handle2, "#", expectedHandleId)));
     }
 
+    function testSetHandleMaxLength() public {
+        string memory SIXTEEN_CHARS = "1234567890123456";
+        uint256 tokenId = profile.mint(address(1));
+        profile.setHandle(tokenId, SIXTEEN_CHARS);
+
+        uint256 expectedHandleId = 0;
+        assertEq(profile.handle(tokenId), string(abi.encodePacked(SIXTEEN_CHARS, "#", expectedHandleId)));
+    }
+
     function testFailEmptyHandle() public {
         uint256 tokenId = profile.mint(address(1));
         profile.setHandle(tokenId, "");
+    }
+
+    function testFailTooLongHandle() public {
+        uint256 tokenId = profile.mint(address(1));
+        string memory SEVENTEEN_CHARS = "12345678901234567";
+        profile.setHandle(tokenId, SEVENTEEN_CHARS);
     }
 
     function testFailSetHandleNotOwner() public {
@@ -56,6 +76,20 @@ contract ProfileTest is Test {
 
         startHoax(address(2));
         profile.setHandle(tokenId, "test");
+    }
+
+    function testManyHandles() public {
+        string memory handle = "test";
+
+        uint256 tokenId = profile.mint(address(1));
+        profile.setHandle(tokenId, handle);
+
+        for (uint256 i = 0; i < 100; i++) {
+            profile.setHandle(tokenId, handle);
+        }
+
+        uint256 expectedHandleId = 100;
+        assertEq(profile.handle(tokenId), string(abi.encodePacked(handle, "#", expectedHandleId)));
     }
 
     function testFailSetHandleInvalidTokenId() public {

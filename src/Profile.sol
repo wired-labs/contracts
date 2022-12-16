@@ -9,23 +9,27 @@ import "./URIStorage.sol";
  * A profile has an optional human-readable handle, which is a string of text followed by a number.
  * For example, "handle#201".
  * The number increments to avoid duplicate handles.
- * The handle can be changed any time by the owner of the profile.
+ * The handle can be changed at any time by the owner of the profile.
  */
 contract Profile is URIStorage {
-    // String part of the handle
+    // Profile id => string part of the handle
     mapping(uint256 => string) private _handles;
 
-    // Number part of the handle
+    // Profile id => number part of the handle
     mapping(uint256 => uint256) private _handleIds;
 
-    // Counter for the number part of the handle
+    // Handle => Counter for the handle id
     mapping(string => uint256) private _handleIdCounters;
+
+    // Maximum length of a handle string
+    uint256 public constant MAX_HANDLE_LENGTH = 16;
 
     constructor() URIStorage("Profile", "PROFILE") {}
 
     function setHandle(uint256 tokenId, string memory newHandle) public {
         require(_isApprovedOrOwner(_msgSender(), tokenId), "Profile: caller is not owner nor approved");
         require(bytes(newHandle).length > 0, "Profile: handle cannot be empty");
+        require(bytes(newHandle).length <= MAX_HANDLE_LENGTH, "Profile: handle is too long");
 
         // Increment the handle counter
         uint256 handleId = _handleIdCounters[newHandle];
