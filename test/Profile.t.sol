@@ -20,8 +20,9 @@ contract ProfileTest is Test {
         uint256 tokenId = profile.mint(address(1));
         profile.setHandle(tokenId, handle);
 
-        uint256 expectedHandleId = 0;
-        assertEq(profile.handle(tokenId), string(abi.encodePacked(handle, "#", expectedHandleId)));
+        (string memory foundHandle, uint256 foundHandleId) = profile.getHandle(tokenId);
+        assertEq(foundHandle, handle);
+        assertEq(foundHandleId, 0);
     }
 
     function testSetHandleTwice(string memory handle) public {
@@ -32,8 +33,9 @@ contract ProfileTest is Test {
         profile.setHandle(tokenId, handle);
         profile.setHandle(tokenId, handle);
 
-        uint256 expectedHandleId = 1;
-        assertEq(profile.handle(tokenId), string(abi.encodePacked(handle, "#", expectedHandleId)));
+        (string memory foundHandle, uint256 foundHandleId) = profile.getHandle(tokenId);
+        assertEq(foundHandle, handle);
+        assertEq(foundHandleId, 1);
     }
 
     function testSetHandleTwiceDifferent(string memory handle1, string memory handle2) public {
@@ -47,8 +49,9 @@ contract ProfileTest is Test {
         profile.setHandle(tokenId, handle1);
         profile.setHandle(tokenId, handle2);
 
-        uint256 expectedHandleId = 0;
-        assertEq(profile.handle(tokenId), string(abi.encodePacked(handle2, "#", expectedHandleId)));
+        (string memory foundHandle, uint256 foundHandleId) = profile.getHandle(tokenId);
+        assertEq(foundHandle, handle2);
+        assertEq(foundHandleId, 0);
     }
 
     function testSetHandleMaxLength() public {
@@ -56,8 +59,9 @@ contract ProfileTest is Test {
         uint256 tokenId = profile.mint(address(1));
         profile.setHandle(tokenId, SIXTEEN_CHARS);
 
-        uint256 expectedHandleId = 0;
-        assertEq(profile.handle(tokenId), string(abi.encodePacked(SIXTEEN_CHARS, "#", expectedHandleId)));
+        (string memory foundHandle, uint256 foundHandleId) = profile.getHandle(tokenId);
+        assertEq(foundHandle, SIXTEEN_CHARS);
+        assertEq(foundHandleId, 0);
     }
 
     function testFailEmptyHandle() public {
@@ -78,22 +82,56 @@ contract ProfileTest is Test {
         profile.setHandle(tokenId, "test");
     }
 
-    function testManyHandleIds() public {
+    function testManyMints() public {
         string memory handle = "test";
         uint256 count = 100;
 
-        uint256 tokenId = profile.mint(address(1));
-
         for (uint256 i = 0; i < count; i++) {
+            uint256 tokenId = profile.mint(address(1));
             profile.setHandle(tokenId, handle);
         }
 
-        uint256 expectedHandleId = count - 1;
-        assertEq(profile.handle(tokenId), string(abi.encodePacked(handle, "#", expectedHandleId)));
+        uint256 finalTokenId = profile.mint(address(1));
+        profile.setHandle(finalTokenId, handle);
+
+        (string memory foundHandle, uint256 foundHandleId) = profile.getHandle(finalTokenId);
+        assertEq(foundHandle, handle);
+        assertEq(foundHandleId, count);
     }
 
     function testFailSetHandleInvalidTokenId() public {
         uint256 tokenId = profile.mint(address(1));
         profile.setHandle(tokenId + 1, "test");
+    }
+
+    function testGetProfileFromHandle() public {
+        string memory handle = "test";
+
+        uint256 tokenId = profile.mint(address(1));
+        uint256 handleId = profile.setHandle(tokenId, handle);
+
+        assertEq(profile.getProfileFromHandle(handle, handleId), tokenId);
+    }
+
+    function testGetProfileFromHandleInvalidHandle() public {
+        string memory handle = "test";
+        uint256 handleId = 0;
+
+        uint256 tokenId = profile.getProfileFromHandle(handle, handleId);
+
+        // Assert not found
+        assertEq(tokenId, 0);
+    }
+
+    function testGetProfileFromHandleInvalidHandleId() public {
+        string memory handle = "test";
+
+        uint256 tokenId = profile.mint(address(1));
+        uint256 handleId = profile.setHandle(tokenId, handle);
+
+        uint256 foundTokenId = profile.getProfileFromHandle(handle, handleId + 1);
+
+        // Assert not found
+        assertEq(foundTokenId, 0);
     }
 }

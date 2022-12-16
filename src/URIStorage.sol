@@ -8,12 +8,12 @@ import "lib/openzeppelin-contracts/contracts/token/ERC721/extensions/ERC721URISt
  * The owner of the token can set the tokenURI.
  */
 contract URIStorage is ERC721URIStorage {
-    uint256 count;
+    uint256 count = 1;
 
     constructor(string memory name, string memory symbol) ERC721(name, symbol) {}
 
     function mint(address to) public returns (uint256) {
-        _mint(to, count);
+        _safeMint(to, count);
         count++;
         return count - 1;
     }
@@ -24,6 +24,6 @@ contract URIStorage is ERC721URIStorage {
     }
 
     function totalSupply() public view returns (uint256) {
-        return count;
+        return count - 1;
     }
 }

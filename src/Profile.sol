@@ -18,7 +18,7 @@ contract Profile is URIStorage {
     // Profile id => number part of the handle
     mapping(uint256 => uint256) private _handleIds;
 
-    // Handle => Counter for the handle id
+    // Handle string => Counter for the handle id
     mapping(string => uint256) private _handleIdCounters;
 
     // Maximum length of a handle string
@@ -26,21 +26,35 @@ contract Profile is URIStorage {
 
     constructor() URIStorage("Profile", "PROFILE") {}
 
-    function setHandle(uint256 tokenId, string memory newHandle) public {
+    function setHandle(uint256 tokenId, string memory newHandle) public returns (uint256) {
         require(_isApprovedOrOwner(_msgSender(), tokenId), "Profile: caller is not owner nor approved");
         require(bytes(newHandle).length > 0, "Profile: handle cannot be empty");
         require(bytes(newHandle).length <= MAX_HANDLE_LENGTH, "Profile: handle is too long");
 
-        // Increment the handle counter
+        // Increment handle counter
         uint256 handleId = _handleIdCounters[newHandle];
         _handleIdCounters[newHandle]++;
 
-        // Set the handle
+        // Set handle
         _handles[tokenId] = newHandle;
         _handleIds[tokenId] = handleId;
+
+        return handleId;
     }
 
-    function handle(uint256 tokenId) public view returns (string memory) {
-        return string(abi.encodePacked(_handles[tokenId], "#", _handleIds[tokenId]));
+    function getHandle(uint256 tokenId) public view returns (string memory, uint256) {
+        return (_handles[tokenId], _handleIds[tokenId]);
+    }
+
+    function getProfileFromHandle(string memory handle, uint256 handleId) public view returns (uint256) {
+        // Loop through all profiles
+        for (uint256 i = 0; i < count; i++) {
+            if (_handleIds[i] == handleId && keccak256(bytes(_handles[i])) == keccak256(bytes(handle))) {
+                return i;
+            }
+        }
+
+        // Not found
+        return 0;
     }
 }
