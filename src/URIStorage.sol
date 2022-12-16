@@ -19,7 +19,7 @@ contract URIStorage is ERC721URIStorage {
     }
 
     function setTokenURI(uint256 tokenId, string memory tokenURI) public {
-        require(_isApprovedOrOwner(_msgSender(), tokenId), "Space: caller is not owner nor approved");
+        require(_isApprovedOrOwner(_msgSender(), tokenId), "Caller is not owner nor approved");
         _setTokenURI(tokenId, tokenURI);
     }
 
