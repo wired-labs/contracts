@@ -78,17 +78,17 @@ contract ProfileTest is Test {
         profile.setHandle(tokenId, "test");
     }
 
-    function testManyHandles() public {
+    function testManyHandleIds() public {
         string memory handle = "test";
+        uint256 count = 100;
 
         uint256 tokenId = profile.mint(address(1));
-        profile.setHandle(tokenId, handle);
 
-        for (uint256 i = 0; i < 100; i++) {
+        for (uint256 i = 0; i < count; i++) {
             profile.setHandle(tokenId, handle);
         }
 
-        uint256 expectedHandleId = 100;
+        uint256 expectedHandleId = count - 1;
         assertEq(profile.handle(tokenId), string(abi.encodePacked(handle, "#", expectedHandleId)));
     }
 
