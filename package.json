@@ -1,7 +1,7 @@
 {
   "name": "contracts",
   "version": "0.0.0",
-  "description": "Smart contracts for the Wired, using [Foundry](https://github.com/foundry-rs/foundry).",
+  "description": "Smart contracts for the Wired.",
   "scripts": {
     "format": "prettier --write src && prettier --write test"
   },
